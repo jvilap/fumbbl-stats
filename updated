@@ -1,0 +1,348 @@
+import requests
+import json
+import concurrent.futures  # Add this import for multithreading
+import re
+
+# List of teams and their IDs (add as many teams as you want here)
+teams = {
+    "1189657": {"name": "Scrum master united"},
+   "1189657": {
+            "name": "Scrum master united"
+        },
+        "1191222": {
+            "name": "\u2665Knariorcz por Fumbowl\u2665"
+        },
+        "1189515": {
+            "name": "Bilbao Bergen Kings of Jet Lag"
+        },
+        "1189650": {
+            "name": "ChorfsBorne"
+        },
+        "1190478": {
+            "name": "<Pain Lovers>"
+        },
+        "1189548": {
+            "name": "Raqueros del Pas"
+        },
+        "1189988": {
+            "name": "Gran Canaria United"
+        },
+        "1190880": {
+            "name": "Necrosado de verte"
+        },
+        "1189519": {
+            "name": "Quebracervells d'Uzgash United"
+        },
+        "1191888": {
+            "name": "TIA BB Team"
+        },
+        "1191208": {
+            "name": "Razones para volver"
+        },
+        "1189507": {
+            "name": "Gnoveas con er tio"
+        },
+        "1189521": {
+            "name": "CBB Seven Green Stars"
+        },
+        "1190518": {
+            "name": "El Foso Oscuro"
+        },
+        "1189348": {
+            "name": "Aliados en la desesperacion"
+        },
+        "1191623": {
+            "name": "Miguelon and miguelones"
+        },
+        "1189509": {
+            "name": "All\u00e1 voy"
+        },
+        "1189540": {
+            "name": "Comida Para Llevar League"
+        },
+        "1190027": {
+            "name": "Goblindins de Bordeaux BBC"
+        },
+        "1189545": {
+            "name": "Goblins ciclados"
+        },
+        "1190874": {
+            "name": "Re-negados del Chaos"
+        },
+        "1189999": {
+            "name": "Argibeltz"
+        },
+        "1191211": {
+            "name": "Rompe Caderas"
+        },
+        "1189512": {
+            "name": "Burger Badboys"
+        },
+        "1189965": {
+            "name": "Necros else matter"
+        },
+        "1189551": {
+            "name": "Brass Citadel Warrior's"
+        },
+        "1189951": {
+            "name": "PellegriniDimisi\u00f3n2"
+        },
+        "1189345": {
+            "name": "Arturo, Pedro y sus amigos"
+        },
+        "1191229": {
+            "name": "Gnome Judas"
+        },
+        "1189508": {
+            "name": "Peque\u00f1os Hijos del Mal"
+        },
+        "1189739": {
+            "name": "Irauli BBT"
+        },
+        "1189178": {
+            "name": "Concierto De Chup\u00f3pteros"
+        },
+        "1189567": {
+            "name": "Tejita Inmortals"
+        },
+        "1191292": {
+            "name": "We Love Perenquenes St.3"
+        },
+        "1189320": {
+            "name": "Orquesta Zinfonika"
+        },
+        "1189514": {
+            "name": "Kompostia Reciclators"
+        },
+        "1189470": {
+            "name": "Se\u00f1oritos oscuritos"
+        },
+        "1191169": {
+            "name": "GnomePegues"
+        },
+        "1189506": {
+            "name": "M\u00e1s perros que Rantampl\u00e1n"
+        },
+        "1189378": {
+            "name": "Ninjas Reanimados del Averno"
+        },
+        "1189952": {
+            "name": "Las Putillas de Miguelon"
+        },
+        "1189554": {
+            "name": "Renegando de la Vida"
+        },
+        "1190002": {
+            "name": "Taponcetes kbrones"
+        },
+        "1189134": {
+            "name": "7\u00ba de Artiller\u00eda Snotling\ud83d\ude08"
+        },
+        "1189536": {
+            "name": "Bushwhackers 006"
+        },
+        "1190035": {
+            "name": "rojos verdes y amarillos"
+        },
+        "1189532": {
+            "name": "Humanos Team"
+        },
+        "1189693": {
+            "name": "Battle Bunker"
+        },
+        "1189637": {
+            "name": "Real Union BBC"
+        },
+        "1191576": {
+            "name": "Sangre para Morcilla"
+        },
+        "1189855": {
+            "name": "Los Canillas Peladas"
+        },
+        "1191853": {
+            "name": "Pelayo en el norte"
+        },
+        "1189648": {
+            "name": "Muditos y Hermanos"
+        },
+        "1189535": {
+            "name": "Kaos Ethilikoh"
+        },
+        "1189574": {
+            "name": "Los Rameros de la Puebla"
+        },
+        "1189547": {
+            "name": "Sons of niggling"
+        },
+        "1189523": {
+            "name": "Chupamos y pisamos BBC"
+        },
+        "1189571": {
+            "name": "Los RompeSue\u00f1os"
+        },
+        "1189513": {
+            "name": "U.D. Valeriana"
+        },
+        "1189797": {
+            "name": "Somos Ratones"
+        },
+        "1189214": {
+            "name": "Zinger-mornings"
+        },
+        "1189511": {
+            "name": "Vampiros por castigo"
+        },
+        "1191864": {
+            "name": "Los Patos Pateadores!"
+        },
+        "1189191": {
+            "name": "Cancer de pota"
+        },
+        "1189544": {
+            "name": "New Rainbow Aces"
+        },
+        "1189986": {
+            "name": "Guardianes Grises"
+        },
+        "1189285": {
+            "name": "Jardinbosque"
+        },
+        "1189560": {
+            "name": "Calidad de Vida FC"
+        },
+        "1190786": {
+            "name": "Mega R\u00e8ptils"
+        },
+        "1189561": {
+            "name": "Parveros 99"
+        },
+        "1189796": {
+            "name": "Comillitos"
+        },
+        "1189522": {
+            "name": "[FL] Re Reborn"
+        },
+        "1189814": {
+            "name": "Pitxulas txulas"
+        },
+        "1189327": {
+            "name": "Canal Pirata Sega"
+        },
+        "1190161": {
+            "name": "T\u00edo La Vara and Co"
+        },
+        "1189964": {
+            "name": "iOWA"
+        },
+        "1191162": {
+            "name": "Salgo para Thailandia en 16min"
+        },
+        "1191971": {
+            "name": "Verrry Black too"
+        },
+        "1189997": {
+            "name": "Solosequenorsenada"
+        },
+        "1190030": {
+            "name": "Chorfers back"
+        },
+        "1189615": {
+            "name": "Guak'molli Crator"
+        },
+        "1190801": {
+            "name": "Hairyfeet Chefs"
+        },
+        "1189553": {
+            "name": "Rhumanos"
+        },
+        "1191786": {
+            "name": "A tres o mas zonas"
+        },
+}
+
+# API URL templates to fetch team and player statistics
+team_url_template = "https://fumbbl.com/api/team/get/{teamId}"
+player_url_template = "https://fumbbl.com/api/player/get/{playerId}"
+
+# Function to remove surrogate characters from strings
+def remove_surrogates(text):
+    return re.sub(r'[\ud800-\udfff]', '', text)
+
+# Function to retrieve the roster for the given team
+def get_team_roster(team_id):
+    team_url = team_url_template.format(teamId=team_id)
+    response = requests.get(team_url)
+    
+    if response.status_code == 200:
+        team_data = response.json()
+        players = team_data.get('players', [])
+        return players  # Return the list of players
+    else:
+        print(f"Error fetching team data for {team_id}: {response.status_code}")
+        return []
+
+# Function to retrieve detailed player statistics
+def get_player_stats(player_id):
+    player_url = player_url_template.format(playerId=player_id)
+    response = requests.get(player_url)
+    
+    if response.status_code == 200:
+        player_data = response.json()
+        player_name = remove_surrogates(player_data.get('name', 'Unknown Player'))
+        touchdowns = player_data['statistics'].get('touchdowns', 0)
+        casualties = player_data['statistics'].get('casualties', 0)
+        return {"name": player_name, "touchdowns": touchdowns, "casualties": casualties}
+    else:
+        print(f"Error fetching player data for {player_id}: {response.status_code}")
+        return None
+
+# Function to find the top scorers and deadliest players for each team
+def find_top_players(team_id, team_name, player_ids):
+    top_scorer = None
+    deadliest_player = None
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(get_player_stats, player_id) for player_id in player_ids]
+        for future in concurrent.futures.as_completed(futures):
+            player_stats = future.result()
+            if player_stats:
+                # Check for top scorer
+                if not top_scorer or player_stats['touchdowns'] > top_scorer['touchdowns']:
+                    top_scorer = player_stats
+
+                # Check for deadliest player
+                if not deadliest_player or player_stats['casualties'] > deadliest_player['casualties']:
+                    deadliest_player = player_stats
+    
+    return {"team_name": remove_surrogates(team_name), "top_scorer": top_scorer, "deadliest_player": deadliest_player}
+
+# Main function to process all teams
+def process_all_teams(teams):
+    results = []
+
+    for team_id, team_info in teams.items():
+        team_name = team_info['name']
+        try:
+            print(f"Processing team: {team_name.encode('utf-8', 'replace').decode('utf-8')} (ID: {team_id})")
+        except UnicodeEncodeError:
+            print(f"Processing team with ID: {team_id} (Unable to print team name due to encoding issue)")
+        
+        # Fetch the team roster (list of players)
+        players = get_team_roster(team_id)
+        player_ids = [player['id'] for player in players]  # Extract player IDs
+        
+        if player_ids:
+            # Find top players for this team
+            team_result = find_top_players(team_id, team_name, player_ids)
+            results.append(team_result)
+        else:
+            print(f"No players found for team {team_name}")
+
+    # Save the results to a file with 'utf-8-sig' encoding, after removing surrogate characters
+    with open("tournament_top_players_async.json", "w", encoding='utf-8') as file:
+        json.dump(results, file, indent=4, ensure_ascii=False)
+    
+    print("Top players for all teams saved to 'tournament_top_players_async.json'")
+
+# Call the main function to process all teams
+process_all_teams(teams)
